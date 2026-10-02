@@ -1,0 +1,27 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"name": "SPI_LCD",
+			"path": "D:\\apps\\wps_cloude_temp\\1868971337\\WPS企业云盘\\湖南大学\\我的企业文档\\E盘\\singlechip\\project_sum\\project_network\\CH32V103EVT\\EVT\\EXAM\\SPI\\SPI_LCD"
+		}
+	],
+	"settings": {
+		"mrs.workspace.type": "project",
+		"mrs.init.arg": "",
+		"files.associations": {
+			"*.c": "c",
+			"*.h": "cpp",
+			"*.hxx": "cpp",
+			"*.hpp": "cpp",
+			"*.c++": "cpp",
+			"*.cpp": "cpp",
+			"*.cxx": "cpp",
+			"*.cc": "cpp",
+			"*.hh": "cpp",
+			"*.h++": "cpp"
+		}
+	}
+}
