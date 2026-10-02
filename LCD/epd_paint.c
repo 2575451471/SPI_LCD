@@ -10,123 +10,7 @@
  */
 static uint8_t EPD_Buffer[EPD_BUFFER_SIZE];
 
-typedef struct
-{
-    char ch;
-    uint8_t data[5];
-} Font5x7_t;
 
-
-/*
- * 每个字符 5 列 × 7 行
- *
- * 每个字节表示一列，
- * bit0 对应顶部像素。
- */
-static const Font5x7_t Font5x7[] =
-{
-    {
-        'E',
-        {
-            0x7F,
-            0x49,
-            0x49,
-            0x49,
-            0x41
-        }
-    },
-
-    {
-        'P',
-        {
-            0x7F,
-            0x09,
-            0x09,
-            0x09,
-            0x06
-        }
-    },
-
-    {
-        'D',
-        {
-            0x7F,
-            0x41,
-            0x41,
-            0x22,
-            0x1C
-        }
-    },
-
-    {
-        'O',
-        {
-            0x3E,
-            0x41,
-            0x41,
-            0x41,
-            0x3E
-        }
-    },
-
-    {
-        'K',
-        {
-            0x7F,
-            0x08,
-            0x14,
-            0x22,
-            0x41
-        }
-    },
-
-    {
-        '0',
-        {
-            0x3E,
-            0x51,
-            0x49,
-            0x45,
-            0x3E
-        }
-    },
-
-    {
-        '1',
-        {
-            0x00,
-            0x42,
-            0x7F,
-            0x40,
-            0x00
-        }
-    },
-
-    {
-        '2',
-        {
-            0x42,
-            0x61,
-            0x51,
-            0x49,
-            0x46
-        }
-    },
-
-    {
-        '3',
-        {
-            0x21,
-            0x41,
-            0x45,
-            0x4B,
-            0x31
-        }
-    }
-};
-
-#define FONT5X7_COUNT \
-    (sizeof(Font5x7) / sizeof(Font5x7[0]))
 
 
 /*********************************************************************
@@ -313,60 +197,70 @@ void Paint_FillRect(uint16_t x0,
 
 
 /*********************************************************************
- * @fn      Paint_DrawChar
+ * @fn      Paint_DrawChar8x16
  *
- * @brief   Draw one 5x7 character
+ * @brief   Draw ASCII character in 8x16 size
+ *
+ *          原始字模:
+ *              8 x 8
+ *
+ *          显示:
+ *              8 x 16
+ *
+ *          方法:
+ *              每一行纵向绘制两次
  *********************************************************************/
-void Paint_DrawChar(uint16_t x,
-                    uint16_t y,
-                    char ch,
-                    uint8_t color)
+void Paint_DrawChar8x16(uint16_t x,
+                        uint16_t y,
+                        char ch,
+                        uint8_t color)
 {
-    uint16_t i;
-    uint8_t col;
+    const uint8_t *font;
+
     uint8_t row;
-    uint8_t column_data;
+    uint8_t col;
+
+    uint8_t row_data;
 
 
     /*
-     * 查找字符
+     * 获得 8x8 字模
      */
-    for(i = 0; i < FONT5X7_COUNT; i++)
-    {
-        if(Font5x7[i].ch == ch)
-        {
-            break;
-        }
-    }
+    font = Font8x8_Get(ch);
 
 
     /*
-     * 字库中没有这个字符
+     * 共 8 行原始数据
      */
-    if(i >= FONT5X7_COUNT)
+    for(row = 0; row < 8; row++)
     {
-        return;
-    }
-
-
-    /*
-     * 5列
-     */
-    for(col = 0; col < 5; col++)
-    {
-        column_data = Font5x7[i].data[col];
+        row_data = font[row];
 
 
         /*
-         * 每列7行
+         * 每行 8 个像素
          */
-        for(row = 0; row < 7; row++)
+        for(col = 0; col < 8; col++)
         {
-            if(column_data & (1 << row))
+            if(row_data & (0x80 >> col))
             {
+                /*
+                 * 每一行重复两次
+                 *
+                 * 原 row=0
+                 * ->
+                 * y=0
+                 * y=1
+                 */
                 Paint_SetPixel(
                     x + col,
-                    y + row,
+                    y + row * 2,
+                    color
+                );
+
+                Paint_SetPixel(
+                    x + col,
+                    y + row * 2 + 1,
                     color
                 );
             }
@@ -376,50 +270,59 @@ void Paint_DrawChar(uint16_t x,
 
 
 /*********************************************************************
- * @fn      Paint_DrawString
+ * @fn      Paint_DrawString8x16
  *
- * @brief   Draw 5x7 ASCII string
+ * @brief   Draw ASCII string
  *
- *          每个字符占 6 pixels:
- *          5 pixel字符 + 1 pixel间隔
+ *          一个字符:
+ *              8 pixels wide
+ *
+ *          字符间距:
+ *              1 pixel
+ *
+ *          实际步进:
+ *              9 pixels
  *********************************************************************/
-void Paint_DrawString(uint16_t x,
-                      uint16_t y,
-                      const char *str,
-                      uint8_t color)
+void Paint_DrawString8x16(uint16_t x,
+                          uint16_t y,
+                          const char *str,
+                          uint8_t color)
 {
     while(*str != '\0')
     {
         /*
-         * 空格单独处理
+         * 防止超出右边界
          */
-        if(*str != ' ')
-        {
-            Paint_DrawChar(
-                x,
-                y,
-                *str,
-                color
-            );
-        }
-
-
-        /*
-         * 5 pixels 字符
-         * +
-         * 1 pixel 间隔
-         */
-        x += 6;
-
-        str++;
-
-
-        /*
-         * 防止越过屏幕
-         */
-        if(x >= EPD_WIDTH)
+        if((x + FONT8X16_WIDTH) > EPD_WIDTH)
         {
             break;
         }
+
+
+        /*
+         * 防止超出下边界
+         */
+        if((y + FONT8X16_HEIGHT) > EPD_HEIGHT)
+        {
+            break;
+        }
+
+
+        Paint_DrawChar8x16(
+            x,
+            y,
+            *str,
+            color
+        );
+
+
+        /*
+         * 8 pixel 字符
+         * +
+         * 1 pixel 间隔
+         */
+        x += 9;
+
+        str++;
     }
 }

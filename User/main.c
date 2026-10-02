@@ -17,6 +17,7 @@ int main(void)
      * Hardware
      */
     EPD_GPIO_Init();
+
     EPD_SPI_Init();
 
 
@@ -27,13 +28,16 @@ int main(void)
 
 
     /*
-     * 清 framebuffer 为白色
+     * =============================================
+     * Framebuffer
+     * =============================================
      */
+
     Paint_Clear(EPD_WHITE);
 
 
     /*
-     * 外框
+     * 外边框
      */
     Paint_DrawHLine(
         0,
@@ -65,38 +69,78 @@ int main(void)
 
 
     /*
-     * 字符测试
+     * 标题
      */
-    Paint_DrawString(
-        20,
-        20,
-        "EPD OK",
+    Paint_DrawString8x16(
+        12,
+        15,
+        "CH32V103",
         EPD_BLACK
     );
 
 
-    Paint_DrawString(
-        20,
+    /*
+     * 分割线
+     */
+    Paint_DrawHLine(
+        10,
+        189,
         40,
-        "0123",
         EPD_BLACK
     );
 
 
     /*
-     * 再画一个参考方块
+     * 屏幕信息
+     */
+    Paint_DrawString8x16(
+        12,
+        55,
+        "EPD 200X200",
+        EPD_BLACK
+    );
+
+
+    Paint_DrawString8x16(
+        12,
+        80,
+        "SSD1608",
+        EPD_BLACK
+    );
+
+
+    Paint_DrawString8x16(
+        12,
+        105,
+        "STATUS: OK",
+        EPD_BLACK
+    );
+
+
+    /*
+     * 一个简单状态方块
      */
     Paint_FillRect(
-        20,
-        70,
-        60,
-        110,
+        12,
+        140,
+        35,
+        163,
+        EPD_BLACK
+    );
+
+
+    Paint_DrawString8x16(
+        48,
+        144,
+        "READY",
         EPD_BLACK
     );
 
 
     /*
-     * 一次性刷新
+     * =============================================
+     * Display
+     * =============================================
      */
     EPD_Display(
         Paint_GetBuffer()
