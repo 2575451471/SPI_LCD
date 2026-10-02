@@ -326,3 +326,148 @@ void Paint_DrawString8x16(uint16_t x,
         str++;
     }
 }
+
+
+
+/*********************************************************************
+ * @fn      Paint_DrawChinese16x16
+ *
+ * @brief   Draw one Chinese character
+ *
+ *          16 pixels x 16 pixels
+ *********************************************************************/
+void Paint_DrawChinese16x16(uint16_t x,
+                            uint16_t y,
+                            uint16_t code,
+                            uint8_t color)
+{
+    const uint8_t *font;
+
+    uint8_t row;
+    uint8_t col;
+
+    uint8_t left;
+    uint8_t right;
+
+
+    /*
+     * 防止超出屏幕范围
+     */
+    if((x + 16) > EPD_WIDTH ||
+       (y + 16) > EPD_HEIGHT)
+    {
+        return;
+    }
+
+
+    /*
+     * 查询字模
+     */
+    font = FontCN16_Get(code);
+
+
+    /*
+     * 找不到这个汉字
+     */
+    if(font == 0)
+    {
+        return;
+    }
+
+
+    /*
+     * 每个汉字16行
+     *
+     * 每行：
+     *      2 bytes
+     */
+    for(row = 0; row < 16; row++)
+    {
+        left  = font[row * 2];
+        right = font[row * 2 + 1];
+
+
+        /*
+         * 左8个像素
+         */
+        for(col = 0; col < 8; col++)
+        {
+            if(left & (0x80 >> col))
+            {
+                Paint_SetPixel(
+                    x + col,
+                    y + row,
+                    color
+                );
+            }
+        }
+
+
+        /*
+         * 右8个像素
+         */
+        for(col = 0; col < 8; col++)
+        {
+            if(right & (0x80 >> col))
+            {
+                Paint_SetPixel(
+                    x + 8 + col,
+                    y + row,
+                    color
+                );
+            }
+        }
+    }
+}
+
+
+/*********************************************************************
+ * @fn      Paint_DrawChineseString16x16
+ *
+ * @brief   Draw Unicode Chinese character array
+ *
+ *          string ends with 0x0000
+ *
+ *          每个汉字：
+ *              16 pixels
+ *
+ *          间距：
+ *              2 pixels
+ *
+ *          步进：
+ *              18 pixels
+ *********************************************************************/
+void Paint_DrawChineseString16x16(uint16_t x,
+                                  uint16_t y,
+                                  const uint16_t *str,
+                                  uint8_t color)
+{
+    while(*str != 0x0000)
+    {
+        /*
+         * 防止超出右边界
+         */
+        if((x + 16) > EPD_WIDTH)
+        {
+            break;
+        }
+
+
+        Paint_DrawChinese16x16(
+            x,
+            y,
+            *str,
+            color
+        );
+
+
+        /*
+         * 16 pixel字符
+         * +
+         * 2 pixel间距
+         */
+        x += 18;
+
+        str++;
+    }
+}

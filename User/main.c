@@ -4,6 +4,31 @@
 #include "epd_paint.h"
 
 
+/*
+ * 墨水屏
+ */
+static const uint16_t Text_EPD[] =
+{
+    0x58A8,
+    0x6C34,
+    0x5C4F,
+    0x0000
+};
+
+
+/*
+ * 状态正常
+ */
+static const uint16_t Text_Status[] =
+{
+    0x72B6,
+    0x6001,
+    0x6B63,
+    0x5E38,
+    0x0000
+};
+
+
 int main(void)
 {
     SystemCoreClockUpdate();
@@ -32,7 +57,6 @@ int main(void)
      * Framebuffer
      * =============================================
      */
-
     Paint_Clear(EPD_WHITE);
 
 
@@ -69,7 +93,7 @@ int main(void)
 
 
     /*
-     * 标题
+     * English title
      */
     Paint_DrawString8x16(
         12,
@@ -80,30 +104,44 @@ int main(void)
 
 
     /*
-     * 分割线
+     * separator
      */
     Paint_DrawHLine(
         10,
         189,
-        40,
+        42,
         EPD_BLACK
     );
 
 
     /*
-     * 屏幕信息
+     * 中文：墨水屏
      */
-    Paint_DrawString8x16(
+    Paint_DrawChineseString16x16(
         12,
-        55,
-        "EPD 200X200",
+        60,
+        Text_EPD,
         EPD_BLACK
     );
 
 
+    /*
+     * 中文：状态正常
+     */
+    Paint_DrawChineseString16x16(
+        12,
+        90,
+        Text_Status,
+        EPD_BLACK
+    );
+
+
+    /*
+     * English information
+     */
     Paint_DrawString8x16(
         12,
-        80,
+        125,
         "SSD1608",
         EPD_BLACK
     );
@@ -111,36 +149,14 @@ int main(void)
 
     Paint_DrawString8x16(
         12,
-        105,
-        "STATUS: OK",
+        155,
+        "200X200",
         EPD_BLACK
     );
 
 
     /*
-     * 一个简单状态方块
-     */
-    Paint_FillRect(
-        12,
-        140,
-        35,
-        163,
-        EPD_BLACK
-    );
-
-
-    Paint_DrawString8x16(
-        48,
-        144,
-        "READY",
-        EPD_BLACK
-    );
-
-
-    /*
-     * =============================================
      * Display
-     * =============================================
      */
     EPD_Display(
         Paint_GetBuffer()
