@@ -471,3 +471,72 @@ void Paint_DrawChineseString16x16(uint16_t x,
         str++;
     }
 }
+
+
+void Paint_DrawUTF8String16x16(uint16_t x,
+                               uint16_t y,
+                               const char *str,
+                               uint8_t color)
+{
+    uint16_t code;
+    uint8_t bytes;
+
+    if(str == 0)
+    {
+        return;
+    }
+
+    while(*str != '\0')
+    {
+        if(*str == '\n')
+        {
+            x = 0;
+            y += 18;
+            str++;
+            continue;
+        }
+
+        bytes = UTF8_Decode(str, &code);
+
+        if(bytes == 0)
+        {
+            str++;
+            continue;
+        }
+
+        if(code <= 0x007F)
+        {
+            if((x + FONT8X16_WIDTH) > EPD_WIDTH)
+            {
+                break;
+            }
+
+            Paint_DrawChar8x16(
+                x,
+                y,
+                (char)code,
+                color
+            );
+
+            x += 9;
+        }
+        else
+        {
+            if((x + FONT_CN16_WIDTH) > EPD_WIDTH)
+            {
+                break;
+            }
+
+            Paint_DrawChinese16x16(
+                x,
+                y,
+                code,
+                color
+            );
+
+            x += 18;
+        }
+
+        str += bytes;
+    }
+}

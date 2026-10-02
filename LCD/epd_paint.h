@@ -4,6 +4,7 @@
 #include "epd.h"
 #include "font.h"
 #include "font_cn.h"
+#include "utf8.h"
 
 
 #define EPD_BUFFER_SIZE \
@@ -64,6 +65,15 @@ void Paint_DrawChineseString16x16(uint16_t x,
                                   uint16_t y,
                                   const uint16_t *str,
                                   uint8_t color);
+
+
+/*
+ * UTF-8 ÖÐÓ¢ÎÄ»ìºÏ×Ö·û´®
+ */
+void Paint_DrawUTF8String16x16(uint16_t x,
+                               uint16_t y,
+                               const char *str,
+                               uint8_t color);
 
 
 uint8_t *Paint_GetBuffer(void);

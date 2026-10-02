@@ -5,28 +5,52 @@
 
 
 /*
- * 墨水屏
+ * UTF-8 字符串
+ *
+ * 注意：
+ * 当前工程源码保持 GBK。
+ * 中文显示字符串使用 \xNN 形式写入真正的 UTF-8 字节，
+ * 这样不受源文件编码影响。
  */
-static const uint16_t Text_EPD[] =
-{
-    0x58A8,
-    0x6C34,
-    0x5C4F,
-    0x0000
-};
 
 
 /*
- * 状态正常
+ * "墨水屏"
+ *
+ * 墨 U+58A8 -> E5 A2 A8
+ * 水 U+6C34 -> E6 B0 B4
+ * 屏 U+5C4F -> E5 B1 8F
  */
-static const uint16_t Text_Status[] =
-{
-    0x72B6,
-    0x6001,
-    0x6B63,
-    0x5E38,
-    0x0000
-};
+static const char Text_EPD_UTF8[] =
+    "\xE5\xA2\xA8"
+    "\xE6\xB0\xB4"
+    "\xE5\xB1\x8F";
+
+
+/*
+ * "状态正常"
+ *
+ * 状 U+72B6 -> E7 8A B6
+ * 态 U+6001 -> E6 80 81
+ * 正 U+6B63 -> E6 AD A3
+ * 常 U+5E38 -> E5 B8 B8
+ */
+static const char Text_Status_UTF8[] =
+    "\xE7\x8A\xB6"
+    "\xE6\x80\x81"
+    "\xE6\xAD\xA3"
+    "\xE5\xB8\xB8";
+
+
+/*
+ * "EPD 墨水屏 OK"
+ */
+static const char Text_Mix_UTF8[] =
+    "EPD "
+    "\xE5\xA2\xA8"
+    "\xE6\xB0\xB4"
+    "\xE5\xB1\x8F"
+    " OK";
 
 
 int main(void)
@@ -61,7 +85,7 @@ int main(void)
 
 
     /*
-     * 外边框
+     * 外框
      */
     Paint_DrawHLine(
         0,
@@ -93,9 +117,9 @@ int main(void)
 
 
     /*
-     * English title
+     * 标题
      */
-    Paint_DrawString8x16(
+    Paint_DrawUTF8String16x16(
         12,
         15,
         "CH32V103",
@@ -104,7 +128,7 @@ int main(void)
 
 
     /*
-     * separator
+     * 分割线
      */
     Paint_DrawHLine(
         10,
@@ -115,48 +139,61 @@ int main(void)
 
 
     /*
-     * 中文：墨水屏
+     * =============================================
+     * UTF-8 中文
+     * =============================================
      */
-    Paint_DrawChineseString16x16(
+
+    /*
+     * 墨水屏
+     */
+    Paint_DrawUTF8String16x16(
         12,
         60,
-        Text_EPD,
+        Text_EPD_UTF8,
         EPD_BLACK
     );
 
 
     /*
-     * 中文：状态正常
+     * 状态正常
      */
-    Paint_DrawChineseString16x16(
+    Paint_DrawUTF8String16x16(
         12,
         90,
-        Text_Status,
+        Text_Status_UTF8,
         EPD_BLACK
     );
 
 
     /*
-     * English information
+     * 中英文混排：
+     *
+     * EPD 墨水屏 OK
      */
-    Paint_DrawString8x16(
+    Paint_DrawUTF8String16x16(
         12,
         125,
-        "SSD1608",
-        EPD_BLACK
-    );
-
-
-    Paint_DrawString8x16(
-        12,
-        155,
-        "200X200",
+        Text_Mix_UTF8,
         EPD_BLACK
     );
 
 
     /*
+     * 英文数字
+     */
+    Paint_DrawUTF8String16x16(
+        12,
+        155,
+        "SSD1608 200X200",
+        EPD_BLACK
+    );
+
+
+    /*
+     * =============================================
      * Display
+     * =============================================
      */
     EPD_Display(
         Paint_GetBuffer()
